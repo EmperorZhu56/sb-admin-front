@@ -11,10 +11,12 @@ import {
   type UserResult,
   type RefreshTokenResult,
   getLogin,
-  refreshTokenApi
+  refreshTokenApi,
+  LoginResult
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
+import { ApiResponse } from "@/utils/http/types";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -58,11 +60,15 @@ export const useUserStore = defineStore({
       this.loginDay = Number(value);
     },
     /** 登入 */
-    async loginByUsername(data) {
-      return new Promise<UserResult>((resolve, reject) => {
+    async login(data) {
+      return new Promise<ApiResponse<LoginResult>>((resolve, reject) => {
         getLogin(data)
-          .then(data => {
-            if (data?.success) setToken(data.data);
+          .then(res => {
+            if (res?.code === 200)
+              setToken({
+                accessToken: res.data.token,
+                expires: new Date()
+              } as DataInfo<Date>);
             resolve(data);
           })
           .catch(error => {

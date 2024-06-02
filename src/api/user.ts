@@ -1,4 +1,5 @@
 import { http } from "@/utils/http";
+import { ApiResponse } from "@/utils/http/types";
 
 export type UserResult = {
   success: boolean;
@@ -20,6 +21,10 @@ export type UserResult = {
   };
 };
 
+export type LoginResult = {
+  token?: string;
+};
+
 export type RefreshTokenResult = {
   success: boolean;
   data: {
@@ -34,7 +39,9 @@ export type RefreshTokenResult = {
 
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/login", { data });
+  return http.request<ApiResponse<LoginResult>>("post", "/api/auth/login", {
+    data
+  });
 };
 
 /** 刷新`token` */

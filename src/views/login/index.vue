@@ -17,6 +17,9 @@ import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
+import { encryptAes } from "@/utils/encryption";
+import dayjs from "dayjs";
+import { DataInfo, setToken } from "@/utils/auth";
 
 defineOptions({
   name: "Login"
@@ -33,8 +36,8 @@ dataThemeChange(overallStyle.value);
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123"
+  account: "admin",
+  password: "123456"
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -43,18 +46,17 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       loading.value = true;
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
+        .login({
+          account: encryptAes(ruleForm.account),
+          password: encryptAes(dayjs().valueOf() + ":" + ruleForm.password)
+        })
         .then(res => {
-          if (res.success) {
-            // 获取后端路由
-            return initRouter().then(() => {
-              router.push(getTopMenu(true).path).then(() => {
-                message("登录成功", { type: "success" });
-              });
+          // 获取后端路由
+          return initRouter().then(() => {
+            router.push(getTopMenu(true).path).then(() => {
+              message("登录成功", { type: "success" });
             });
-          } else {
-            message("登录失败", { type: "error" });
-          }
+          });
         })
         .finally(() => (loading.value = false));
     }
@@ -116,10 +118,10 @@ onBeforeUnmount(() => {
                     trigger: 'blur'
                   }
                 ]"
-                prop="username"
+                prop="account"
               >
                 <el-input
-                  v-model="ruleForm.username"
+                  v-model="ruleForm.account"
                   clearable
                   placeholder="账号"
                   :prefix-icon="useRenderIcon(User)"
